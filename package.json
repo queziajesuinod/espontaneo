@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --parallel --filter ./apps/* dev",
-    "banco:up": "docker compose up -d db",
+    "banco:up": "docker compose -f docker-compose.dev.yml up -d",
     "migrar": "pnpm --filter @espontaneo/api migrar",
     "semear": "pnpm --filter @espontaneo/api semear",
     "tipos": "pnpm --filter @espontaneo/api tipos"

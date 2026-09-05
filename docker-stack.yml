@@ -1,0 +1,120 @@
+version: "3.9"
+
+# Deploy no estilo Swarm + Traefik (clona o repo em runtime, sem buildar imagem).
+# Um domínio só: o Traefik manda /api/* para a API e o resto para o site.
+# TROQUE os valores marcados com <...> antes de subir.
+
+services:
+  api:
+    image: node:22
+    networks:
+      - network_public
+    environment:
+      NODE_ENV: production
+      # Postgres que você já tem: use o NOME do container/serviço na network_public
+      DATABASE_URL: "postgres://<USUARIO>:<SENHA>@<NOME_DO_POSTGRES>:5432/espontaneo"
+      PORT: "3335"
+      SESSION_SECRET: "<openssl rand -hex 32>"
+      IP_SALT: "<openssl rand -hex 16>"
+      ACERVO_DIR: /dados/acervo
+      ADMIN_EMAIL: "admin@espontaneo.local"
+      ADMIN_SENHA: "<uma senha forte>"
+    volumes:
+      - espontaneo_api:/app
+      - espontaneo_acervo:/dados/acervo
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-lc"]
+    command:
+      - >
+        set -e;
+        corepack enable;
+        if [ ! -d /app/.git ]; then
+          echo "Clonando o repositório...";
+          rm -rf /app/* /app/.[!.]* 2>/dev/null || true;
+          git clone https://github.com/queziajesuinod/espontaneo.git /app;
+        else
+          echo "Atualizando...";
+          cd /app; git fetch origin main; git reset --hard origin/main;
+        fi;
+        cd /app;
+        pnpm install --frozen-lockfile --prod --filter @espontaneo/api...;
+        cd /app/apps/api;
+        sh docker-entrypoint.sh;
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=network_public"
+        # /api/* vai para a API (prioridade maior que a rota do site)
+        - "traefik.http.routers.espontaneo-api.rule=Host(`espontaneo.juventuderelevante.com.br`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.espontaneo-api.entrypoints=websecure"
+        - "traefik.http.routers.espontaneo-api.tls=true"
+        - "traefik.http.routers.espontaneo-api.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.espontaneo-api.priority=100"
+        - "traefik.http.routers.espontaneo-api.service=espontaneo-api"
+        - "traefik.http.services.espontaneo-api.loadbalancer.server.port=3335"
+
+  web:
+    image: node:22
+    networks:
+      - network_public
+    volumes:
+      - espontaneo_web:/app
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-lc"]
+    command:
+      - >
+        set -e;
+        corepack enable;
+        if [ ! -d /app/.git ]; then
+          echo "Clonando o repositório...";
+          rm -rf /app/* /app/.[!.]* 2>/dev/null || true;
+          git clone https://github.com/queziajesuinod/espontaneo.git /app;
+        else
+          echo "Atualizando...";
+          cd /app; git fetch origin main; git reset --hard origin/main;
+        fi;
+        cd /app;
+        pnpm install --frozen-lockfile --filter @espontaneo/site...;
+        pnpm --filter @espontaneo/site build;
+        pnpm --filter @espontaneo/site preview;
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=network_public"
+        # site (https)
+        - "traefik.http.routers.espontaneo.rule=Host(`espontaneo.juventuderelevante.com.br`)"
+        - "traefik.http.routers.espontaneo.entrypoints=websecure"
+        - "traefik.http.routers.espontaneo.tls=true"
+        - "traefik.http.routers.espontaneo.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.espontaneo.loadbalancer.server.port=5173"
+        # redireciona http -> https
+        - "traefik.http.routers.espontaneo-http.rule=Host(`espontaneo.juventuderelevante.com.br`)"
+        - "traefik.http.routers.espontaneo-http.entrypoints=web"
+        - "traefik.http.routers.espontaneo-http.middlewares=redirect-to-https"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+
+networks:
+  network_public:
+    external: true
+
+volumes:
+  espontaneo_api:
+  espontaneo_web:
+  espontaneo_acervo:

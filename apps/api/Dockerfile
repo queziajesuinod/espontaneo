@@ -23,9 +23,11 @@ COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_module
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY packages/shared packages/shared
 COPY apps/api apps/api
+# normaliza fim de linha (caso venha CRLF do Windows) e torna executável
+RUN sed -i 's/\r$//' apps/api/docker-entrypoint.sh && chmod +x apps/api/docker-entrypoint.sh
 
 WORKDIR /app/apps/api
 EXPOSE 3335
 
-# aplica as migrações (idempotente) e sobe o servidor
-CMD ["sh", "-c", "node --experimental-strip-types scripts/migrar.ts && node --experimental-strip-types src/server.ts"]
+# migra sempre, semeia na 1ª subida e sobe o servidor
+CMD ["./docker-entrypoint.sh"]

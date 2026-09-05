@@ -1,56 +1,42 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: espontaneo
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-espontaneo}
-      POSTGRES_DB: espontaneo
-    ports:
-      # só no localhost — o Postgres não fica exposto para fora da VPS
-      - "127.0.0.1:5433:5432"
-    volumes:
-      - dados:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U espontaneo"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  # ---- produção: `docker compose --profile prod up -d --build` ----
   api:
-    profiles: ["prod"]
     build:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      DATABASE_URL: postgres://espontaneo:${POSTGRES_PASSWORD:-espontaneo}@db:5432/espontaneo
+      # aponte para o seu Postgres já existente (nome do container na mesma rede, ou host)
+      DATABASE_URL: ${DATABASE_URL:?defina DATABASE_URL do seu Postgres}
       PORT: "3335"
-      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET no .env}
-      IP_SALT: ${IP_SALT:?defina IP_SALT no .env}
+      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET}
+      IP_SALT: ${IP_SALT:?defina IP_SALT}
       ACERVO_DIR: /dados/acervo
       TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@espontaneo.local}
       ADMIN_SENHA: ${ADMIN_SENHA:-espontaneo}
     volumes:
       - acervo:/dados/acervo
-    depends_on:
-      db:
-        condition: service_healthy
+    networks:
+      - default   # conversa com o web
+      - banco      # conversa com o seu Postgres
     restart: unless-stopped
 
   web:
-    profiles: ["prod"]
     build:
       context: .
       dockerfile: apps/site/Dockerfile
     ports:
-      - "80:80"
+      # troque WEB_PORT se a 80 já estiver ocupada na VPS
+      - "${WEB_PORT:-80}:80"
     depends_on:
       - api
     restart: unless-stopped
 
 volumes:
-  dados:
   acervo:
+
+networks:
+  # a rede Docker onde o seu container do Postgres já está
+  banco:
+    external: true
+    name: ${DB_NETWORK:?defina DB_NETWORK (a rede do seu Postgres)}

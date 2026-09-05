@@ -19,7 +19,7 @@ docs/           design system, arquitetura e o protótipo em HTML
 ```bash
 cp .env.example .env
 pnpm install
-docker compose up -d db
+pnpm banco:up   # Postgres local (docker-compose.dev.yml) em localhost:5433
 pnpm migrar     # aplica apps/api/migrations/*.sql
 pnpm semear     # carrega as 47 pautas do seed e cria o admin
 pnpm dev        # api em :3335, site em :5173
@@ -55,30 +55,45 @@ curl -b /tmp/c.txt -X POST localhost:3335/api/admin/publicacoes
 
 ## Deploy na VPS (Docker)
 
-Tudo empacotado: `db` (Postgres), `api` (Fastify) e `web` (nginx servindo o site
-estático e fazendo proxy de `/api`). A API e o site ficam num profile `prod`, então o
-fluxo de dev (`pnpm banco:up`) continua subindo só o banco.
+Dois serviços: `api` (Fastify) e `web` (nginx servindo o site estático e fazendo proxy de
+`/api`). O **Postgres é o que você já tem na VPS** — o stack não sobe um banco. A API
+**migra e semeia sozinha na primeira subida** (admin + 47 pautas), então não há comando
+manual: é só subir o stack.
+
+### Portainer (Stack a partir do repositório)
+
+1. **Stacks → Add stack → Repository**.
+2. **Repository URL**: `https://github.com/queziajesuinod/espontaneo.git`
+   · **Reference**: `refs/heads/main` · **Compose path**: `docker-compose.yml`.
+3. Em **Environment variables**, defina:
+   - `DATABASE_URL` — o seu Postgres, ex.: `postgres://usuario:senha@nome-do-container:5432/espontaneo`
+   - `SESSION_SECRET` — `openssl rand -hex 32`
+   - `IP_SALT` — `openssl rand -hex 16`
+   - `ADMIN_EMAIL` / `ADMIN_SENHA` — o primeiro login da curadoria
+   - `WEB_PORT` — porta do site na VPS (padrão `80`; troque se já estiver ocupada)
+   - `NODE_ENV` — `production` (exige HTTPS; use `development` só para testar em `http://IP`)
+4. **Deploy the stack**. O Portainer builda as imagens; a `api` migra + semeia e o `web`
+   começa a servir.
+
+> Se o Postgres for **outro container**, a `api` precisa alcançá-lo: use o nome do container
+> no `DATABASE_URL` e coloque os dois na mesma rede Docker (ou aponte para o host).
+> Crie antes o banco de dados `espontaneo` (`CREATE DATABASE espontaneo;`) — as tabelas a
+> API cria sozinha nas migrações.
+
+Para atualizar depois: no stack, **Pull and redeploy**.
+
+### Ou por linha de comando
 
 ```bash
-# na VPS, com Docker e Docker Compose instalados
-git clone <repo> espontaneo && cd espontaneo
-cp .env.example .env        # e edite: SESSION_SECRET, IP_SALT, POSTGRES_PASSWORD, ADMIN_*
-
-# gere segredos fortes
-openssl rand -hex 32        # SESSION_SECRET
-openssl rand -hex 16        # IP_SALT
-
-docker compose --profile prod up -d --build   # sobe db + api + web (as migrações rodam sozinhas)
-docker compose --profile prod run --rm api node --experimental-strip-types scripts/semear.ts  # 1ª vez: admin + 47 pautas
+git clone https://github.com/queziajesuinod/espontaneo.git espontaneo && cd espontaneo
+cp .env.example .env        # edite DATABASE_URL, SESSION_SECRET, IP_SALT, ADMIN_*
+docker compose up -d --build
 ```
 
-O site fica na porta **80**. O snapshot do acervo vive no volume `acervo`, e o banco no
-volume `dados` — os dois sobrevivem a `up`/`down`.
+O snapshot do acervo vive no volume `acervo` — sobrevive a `up`/`down`.
 
-- **HTTPS é necessário em produção**: o cookie de sessão é `secure` quando `NODE_ENV=production`.
-  Ponha um proxy TLS na frente (Caddy/Traefik/nginx + certbot) apontando para a porta 80.
-  Só para testar em `http://IP`, troque `NODE_ENV=development` no `.env`.
-- Atualizar: `git pull && docker compose --profile prod up -d --build`.
+- **HTTPS em produção**: o cookie de sessão é `secure` quando `NODE_ENV=production`.
+  Ponha um proxy TLS na frente (Caddy/Traefik/nginx + certbot) apontando para a `WEB_PORT`.
 - Publicar de novo o snapshot não é preciso — a API regenera sozinha a cada mudança.
 
 ## Decisões que o código carrega
