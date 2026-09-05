@@ -10,5 +10,8 @@ if [ "$(node --experimental-strip-types scripts/precisa-semear.ts)" = "sim" ]; t
   node --experimental-strip-types scripts/semear.ts
 fi
 
-# 3) sobe o servidor
+# 3) gera/atualiza o snapshot do acervo (idempotente)
+node --experimental-strip-types scripts/publicar.ts
+
+# 4) sobe o servidor
 exec node --experimental-strip-types src/server.ts
