@@ -1,0 +1,67 @@
+{
+  "versao": 1,
+  "categorias": [
+    { "id": "evangelhos", "nome": "Evangelhos" },
+    { "id": "salmos", "nome": "Salmos" },
+    { "id": "cartas", "nome": "Cartas" },
+    { "id": "antigo-testamento", "nome": "Antigo Testamento" },
+    { "id": "doutrina", "nome": "Doutrina" },
+    { "id": "vida-crista", "nome": "Vida cristã" },
+    { "id": "juventude", "nome": "Juventude" }
+  ],
+  "pautas": [
+    { "id": "ev-001", "categoria": "evangelhos", "referencia": "Lucas 15:11-32", "titulo": "O filho que voltou", "provocacao": "Fale sobre o pai que correu.", "tags": ["graça", "arrependimento", "família"], "nivel": 1, "sazonal": null },
+    { "id": "ev-002", "categoria": "evangelhos", "referencia": "João 4:1-26", "titulo": "A conversa no poço", "provocacao": "Fale sobre uma conversa que ninguém esperava acontecer.", "tags": ["encontro", "sede", "preconceito"], "nivel": 1, "sazonal": null },
+    { "id": "ev-003", "categoria": "evangelhos", "referencia": "Marcos 4:35-41", "titulo": "A tempestade acalmada", "provocacao": "Fale sobre dormir no meio do vendaval.", "tags": ["medo", "fé", "milagre"], "nivel": 1, "sazonal": null },
+    { "id": "ev-004", "categoria": "evangelhos", "referencia": "Mateus 5:1-12", "titulo": "As bem-aventuranças", "provocacao": "Escolha uma delas e defenda por que ela é difícil.", "tags": ["reino", "ética"], "nivel": 2, "sazonal": null },
+    { "id": "ev-005", "categoria": "evangelhos", "referencia": "João 11:1-44", "titulo": "Lázaro", "provocacao": "Fale sobre o Jesus que chorou sabendo o final.", "tags": ["luto", "ressurreição", "compaixão"], "nivel": 2, "sazonal": null },
+    { "id": "ev-006", "categoria": "evangelhos", "referencia": "Lucas 10:25-37", "titulo": "O bom samaritano", "provocacao": "Fale sobre quem passou reto.", "tags": ["próximo", "misericórdia"], "nivel": 1, "sazonal": null },
+    { "id": "ev-007", "categoria": "evangelhos", "referencia": "Mateus 14:22-33", "titulo": "Sobre as águas", "provocacao": "Fale sobre o passo que vem antes do medo.", "tags": ["fé", "dúvida", "coragem"], "nivel": 1, "sazonal": null },
+    { "id": "ev-008", "categoria": "evangelhos", "referencia": "Lucas 19:1-10", "titulo": "Zaqueu", "provocacao": "Fale sobre o convite que veio antes da mudança.", "tags": ["graça", "restituição"], "nivel": 1, "sazonal": null },
+    { "id": "ev-009", "categoria": "evangelhos", "referencia": "João 8:1-11", "titulo": "Escrevendo no chão", "provocacao": "Fale sobre o silêncio de Jesus diante da acusação.", "tags": ["julgamento", "perdão"], "nivel": 2, "sazonal": null },
+    { "id": "ev-010", "categoria": "evangelhos", "referencia": "Marcos 10:17-27", "titulo": "O jovem rico", "provocacao": "Fale sobre a vez em que Jesus não abaixou o preço.", "tags": ["discipulado", "posses"], "nivel": 2, "sazonal": null },
+    { "id": "ev-011", "categoria": "evangelhos", "referencia": "Lucas 2:1-20", "titulo": "A notícia aos pastores", "provocacao": "Fale sobre a notícia chegar primeiro para quem ninguém consultava.", "tags": ["encarnação", "humildade"], "nivel": 1, "sazonal": "natal" },
+    { "id": "ev-012", "categoria": "evangelhos", "referencia": "Lucas 24:13-35", "titulo": "Emaús", "provocacao": "Fale sobre andar ao lado de Jesus sem reconhecer.", "tags": ["ressurreição", "caminho"], "nivel": 2, "sazonal": "pascoa" },
+
+    { "id": "sl-001", "categoria": "salmos", "referencia": "Salmo 23", "titulo": "O pastor", "provocacao": "Fale sobre o vale, não sobre os pastos verdes.", "tags": ["cuidado", "sofrimento"], "nivel": 1, "sazonal": null },
+    { "id": "sl-002", "categoria": "salmos", "referencia": "Salmo 51", "titulo": "Cria em mim", "provocacao": "Fale sobre o que é pedir um coração novo depois de errar feio.", "tags": ["arrependimento", "restauração"], "nivel": 2, "sazonal": null },
+    { "id": "sl-003", "categoria": "salmos", "referencia": "Salmo 13", "titulo": "Até quando", "provocacao": "Fale sobre reclamar com Deus sem perder a fé.", "tags": ["lamento", "espera"], "nivel": 2, "sazonal": null },
+    { "id": "sl-004", "categoria": "salmos", "referencia": "Salmo 139", "titulo": "Sondado e conhecido", "provocacao": "Fale sobre ser conhecido antes de ser visto.", "tags": ["identidade", "presença"], "nivel": 1, "sazonal": null },
+    { "id": "sl-005", "categoria": "salmos", "referencia": "Salmo 1", "titulo": "A árvore plantada", "provocacao": "Fale sobre o tempo que uma árvore leva para dar fruto.", "tags": ["constância", "escolhas"], "nivel": 1, "sazonal": null },
+    { "id": "sl-006", "categoria": "salmos", "referencia": "Salmo 46", "titulo": "Aquietai-vos", "provocacao": "Fale sobre ficar quieto quando tudo está desabando.", "tags": ["ansiedade", "confiança"], "nivel": 1, "sazonal": null },
+    { "id": "sl-007", "categoria": "salmos", "referencia": "Salmo 73", "titulo": "A inveja de Asafe", "provocacao": "Fale sobre invejar quem parece estar ganhando errado.", "tags": ["justiça", "inveja"], "nivel": 3, "sazonal": null },
+
+    { "id": "ct-001", "categoria": "cartas", "referencia": "Filipenses 2:5-11", "titulo": "Esvaziou-se", "provocacao": "Fale sobre abrir mão quando você tinha direito de não abrir.", "tags": ["humildade", "cristo"], "nivel": 3, "sazonal": null },
+    { "id": "ct-002", "categoria": "cartas", "referencia": "Romanos 8:31-39", "titulo": "Nada nos separa", "provocacao": "Fale sobre o que não separa.", "tags": ["segurança", "amor"], "nivel": 1, "sazonal": null },
+    { "id": "ct-003", "categoria": "cartas", "referencia": "Tiago 1:19-25", "titulo": "O espelho", "provocacao": "Fale sobre esquecer a própria cara ao sair do espelho.", "tags": ["prática", "escuta"], "nivel": 2, "sazonal": null },
+    { "id": "ct-004", "categoria": "cartas", "referencia": "1 Coríntios 13", "titulo": "O amor", "provocacao": "Fale sobre amor como verbo, não como sentimento.", "tags": ["amor", "relacionamentos"], "nivel": 1, "sazonal": null },
+    { "id": "ct-005", "categoria": "cartas", "referencia": "Efésios 2:1-10", "titulo": "Pela graça", "provocacao": "Fale sobre graça para quem acha que se salvou sozinho.", "tags": ["graça", "salvação"], "nivel": 2, "sazonal": null },
+    { "id": "ct-006", "categoria": "cartas", "referencia": "Hebreus 11:1-16", "titulo": "Sem receber a promessa", "provocacao": "Fale sobre quem morreu antes de ver o que esperava.", "tags": ["fé", "esperança"], "nivel": 3, "sazonal": null },
+    { "id": "ct-007", "categoria": "cartas", "referencia": "2 Coríntios 12:7-10", "titulo": "O espinho", "provocacao": "Fale sobre o que Deus escolheu não tirar.", "tags": ["fraqueza", "sofrimento"], "nivel": 3, "sazonal": null },
+    { "id": "ct-008", "categoria": "cartas", "referencia": "Gálatas 5:22-23", "titulo": "O fruto do Espírito", "provocacao": "Escolha um fruto e fale sobre o custo dele.", "tags": ["santificação", "caráter"], "nivel": 2, "sazonal": null },
+
+    { "id": "at-001", "categoria": "antigo-testamento", "referencia": "Gênesis 22:1-14", "titulo": "O monte", "provocacao": "Fale sobre os três dias de caminhada até lá.", "tags": ["obediência", "prova"], "nivel": 3, "sazonal": null },
+    { "id": "at-002", "categoria": "antigo-testamento", "referencia": "Êxodo 3:1-14", "titulo": "A sarça", "provocacao": "Fale sobre as desculpas de Moisés.", "tags": ["chamado", "insegurança"], "nivel": 1, "sazonal": null },
+    { "id": "at-003", "categoria": "antigo-testamento", "referencia": "1 Reis 19:1-18", "titulo": "Elias debaixo do zimbro", "provocacao": "Fale sobre Deus mandar comer e dormir antes de falar.", "tags": ["exaustão", "cuidado"], "nivel": 2, "sazonal": null },
+    { "id": "at-004", "categoria": "antigo-testamento", "referencia": "Rute 1:1-18", "titulo": "Rute e Noemi", "provocacao": "Fale sobre escolher ficar quando dava para ir embora.", "tags": ["lealdade", "luto"], "nivel": 2, "sazonal": null },
+    { "id": "at-005", "categoria": "antigo-testamento", "referencia": "Daniel 3:16-18", "titulo": "Mas se não", "provocacao": "Fale sobre a fé que continua mesmo se Deus não livrar.", "tags": ["coragem", "confiança"], "nivel": 3, "sazonal": null },
+    { "id": "at-006", "categoria": "antigo-testamento", "referencia": "Isaías 6:1-8", "titulo": "Eis-me aqui", "provocacao": "Fale sobre ver a santidade antes de aceitar a missão.", "tags": ["adoração", "chamado"], "nivel": 3, "sazonal": null },
+    { "id": "at-007", "categoria": "antigo-testamento", "referencia": "Jonas 4", "titulo": "O profeta irritado", "provocacao": "Fale sobre ficar bravo com a misericórdia de Deus.", "tags": ["misericórdia", "orgulho"], "nivel": 2, "sazonal": null },
+    { "id": "at-008", "categoria": "antigo-testamento", "referencia": "Eclesiastes 3:1-8", "titulo": "Tempo para tudo", "provocacao": "Fale sobre o tempo de calar.", "tags": ["sabedoria", "tempo"], "nivel": 2, "sazonal": null },
+
+    { "id": "dt-001", "categoria": "doutrina", "referencia": "João 1:1-14", "titulo": "O Verbo se fez carne", "provocacao": "Explique a encarnação para uma criança de dez anos.", "tags": ["cristologia", "encarnação"], "nivel": 3, "sazonal": "natal" },
+    { "id": "dt-002", "categoria": "doutrina", "referencia": "Romanos 3:21-26", "titulo": "Justificados", "provocacao": "Explique por que a graça não é injustiça.", "tags": ["justificação", "graça"], "nivel": 3, "sazonal": null },
+    { "id": "dt-003", "categoria": "doutrina", "referencia": "1 Coríntios 15:12-22", "titulo": "Se Cristo não ressuscitou", "provocacao": "Fale sobre tudo o que cai junto se isso não for verdade.", "tags": ["ressurreição", "esperança"], "nivel": 3, "sazonal": "pascoa" },
+    { "id": "dt-004", "categoria": "doutrina", "referencia": "Atos 2:42-47", "titulo": "A igreja antes do prédio", "provocacao": "Fale sobre o que eles faziam quando não havia templo.", "tags": ["igreja", "comunhão"], "nivel": 2, "sazonal": null },
+    { "id": "dt-005", "categoria": "doutrina", "referencia": "Atos 2:1-13", "titulo": "Cada um na própria língua", "provocacao": "Fale sobre Deus falar no idioma de quem ouve.", "tags": ["espírito santo", "missão"], "nivel": 2, "sazonal": "pentecostes" },
+
+    { "id": "vc-001", "categoria": "vida-crista", "referencia": "Mateus 6:5-15", "titulo": "No quarto fechado", "provocacao": "Fale sobre orar sem plateia.", "tags": ["oração", "sinceridade"], "nivel": 1, "sazonal": null },
+    { "id": "vc-002", "categoria": "vida-crista", "referencia": "Provérbios 15:1", "titulo": "A resposta branda", "provocacao": "Fale sobre isso numa discussão de família.", "tags": ["conflito", "palavras"], "nivel": 1, "sazonal": null },
+    { "id": "vc-003", "categoria": "vida-crista", "referencia": "Colossenses 3:12-14", "titulo": "Suportando uns aos outros", "provocacao": "Fale sobre perdoar alguém que não pediu perdão.", "tags": ["perdão", "comunidade"], "nivel": 2, "sazonal": null },
+    { "id": "vc-004", "categoria": "vida-crista", "referencia": "Marcos 12:41-44", "titulo": "As duas moedinhas", "provocacao": "Fale sobre dar o que faz falta.", "tags": ["generosidade", "sacrifício"], "nivel": 1, "sazonal": null },
+
+    { "id": "jv-001", "categoria": "juventude", "referencia": "1 Timóteo 4:12", "titulo": "Ninguém despreze", "provocacao": "Fale sobre respeito que não se exige, se constrói.", "tags": ["exemplo", "juventude"], "nivel": 1, "sazonal": null },
+    { "id": "jv-002", "categoria": "juventude", "referencia": "Gênesis 39", "titulo": "José correu", "provocacao": "Fale sobre correr em vez de tentar conversar com a tentação.", "tags": ["integridade", "tentação"], "nivel": 2, "sazonal": null },
+    { "id": "jv-003", "categoria": "juventude", "referencia": "Salmo 119:9", "titulo": "Como o jovem guarda o caminho", "provocacao": "Fale sobre pureza sem transformar em lista de regras.", "tags": ["santidade", "palavra"], "nivel": 2, "sazonal": null }
+  ]
+}

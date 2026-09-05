@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espontâneo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Petrona:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sala:#DBDED4;
+    --papel:#FBFAF6;
+    --tinta:#10193B;
+    --caneta:#1C34A8;
+    --carmim:#A81C2E;   /* sobre fundo claro */
+    --alerta:#FF6A54;   /* mesmo papel, sobre a tela invertida */
+    --traco:rgba(16,25,59,.14);
+    --ui:"Familjen Grotesk",system-ui,sans-serif;
+    --serif:"Petrona",Georgia,serif;
+    --u:8px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--sala);color:var(--tinta);
+    font-family:var(--ui);font-size:17px;line-height:1.5;
+    min-height:100dvh;
+    transition:background .18s linear,color .18s linear;
+  }
+  body.invertido{background:var(--tinta);color:var(--papel)}
+  :focus-visible{outline:2px solid var(--caneta);outline-offset:4px}
+  body.invertido :focus-visible{outline-color:var(--papel)}
+
+  .app{max-width:960px;margin:0 auto;padding:calc(var(--u)*4) calc(var(--u)*3) calc(var(--u)*8);text-align:center}
+
+  /* ---------- marca ---------- */
+  .marca{font-size:20px;font-weight:600;letter-spacing:-.015em}
+  .marca .chapeu{display:inline-block;color:var(--caneta);transform-origin:50% 80%}
+  .marca .chapeu.flick{animation:flick .5s cubic-bezier(.2,.9,.25,1)}
+  @keyframes flick{
+    0%{transform:translateY(-5px) rotate(-9deg)}
+    55%{transform:translateY(1px) rotate(3deg)}
+    100%{transform:none}
+  }
+  body.invertido .marca .chapeu{color:var(--sala)}
+
+  /* ---------- categorias ---------- */
+  .categorias{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    gap:6px calc(var(--u)*2.5);margin-top:calc(var(--u)*5);
+  }
+  @media(max-width:640px){
+    .categorias{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start;
+      margin-inline:calc(var(--u)*-3);padding-inline:calc(var(--u)*3)}
+    .categorias::-webkit-scrollbar{display:none}
+  }
+  .cat{
+    background:none;border:0;padding:2px 0;cursor:pointer;white-space:nowrap;
+    font:500 17px/1.3 var(--ui);color:inherit;opacity:.5;
+    border-bottom:2px solid transparent;
+  }
+  .cat:hover{opacity:.8}
+  .cat[aria-pressed="true"]{opacity:1;font-weight:600;color:var(--caneta);border-bottom-color:var(--caneta)}
+
+  /* ---------- a carta ---------- */
+  .mesa{display:flex;justify-content:center;margin-top:calc(var(--u)*7);min-height:min(52vh,400px)}
+  .carta{position:relative;width:min(100%,600px)}
+
+  /* folhas da pilha, atrás */
+  .folha{
+    position:absolute;inset:0;background:var(--papel);border-radius:3px;
+    box-shadow:0 0 0 1px rgba(16,25,59,.07);
+    transition:transform .22s cubic-bezier(.2,.9,.25,1);
+  }
+
+  .papelzinho{
+    position:relative;
+    background-color:var(--papel);
+    /* a dobra em quatro: um vinco vertical, um horizontal */
+    background-image:
+      linear-gradient(to right,transparent calc(50% - 1px),rgba(16,25,59,.075) 50%,transparent calc(50% + 1px)),
+      linear-gradient(to bottom,transparent calc(50% - 1px),rgba(16,25,59,.055) 50%,transparent calc(50% + 1px));
+    border-radius:3px;
+    padding:calc(var(--u)*6) calc(var(--u)*4);
+    box-shadow:12px 14px 0 rgba(16,25,59,.11);
+    transform:rotate(var(--giro,-.7deg));
+    transition:transform .22s cubic-bezier(.2,.9,.25,1),opacity .16s linear;
+    color:var(--tinta);
+    display:flex;flex-direction:column;justify-content:center;
+    min-height:min(46vh,340px);
+    overflow:hidden;
+  }
+  /* grão de papel */
+  .papelzinho::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .saindo{opacity:0;transform:translateY(30px) rotate(0deg) scale(.97)}
+
+  .ref{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.01em;opacity:.75}
+  .prov{
+    font-family:var(--serif);font-size:clamp(30px,6.4vw,50px);font-weight:500;line-height:1.14;
+    margin:calc(var(--u)*3) auto 0;max-width:17ch;text-wrap:balance;
+  }
+  .cat-papel{margin-top:calc(var(--u)*4);font-size:14px;opacity:.5}
+  .vazio{font-family:var(--serif);font-size:clamp(26px,5vw,38px);line-height:1.25;max-width:15ch;margin:0 auto;opacity:.6}
+
+  /* ---------- ações ---------- */
+  .acoes{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--u);margin-top:calc(var(--u)*5)}
+  .cronometro .acoes{margin-top:calc(var(--u)*7)}
+  .btn{
+    font:600 19px/1 var(--ui);cursor:pointer;
+    padding:17px 38px;border-radius:999px;border:1.5px solid var(--caneta);
+    background:var(--caneta);color:var(--papel);transition:filter .12s linear;
+  }
+  .btn:hover{filter:brightness(1.13)}
+  .btn.vazado{background:none;color:var(--caneta);font-weight:500;padding-inline:22px}
+  .btn.vazado:disabled{opacity:.3;cursor:not-allowed}
+  body.invertido .btn{background:var(--papel);border-color:var(--papel);color:var(--tinta)}
+  body.invertido .btn.vazado{background:none;color:var(--papel)}
+  @media(max-width:640px){.btn{flex:1 1 100%}.btn.vazado{flex:1 1 40%}}
+  .contagem{margin-top:calc(var(--u)*3);font-size:14px;opacity:.5}
+
+  /* ---------- cronômetro ---------- */
+  .cronometro{display:none}
+  body.rodando .palco{display:none}
+  /* cronômetro centrado no eixo vertical da tela */
+  body.rodando .cronometro{
+    display:flex;flex-direction:column;justify-content:center;
+    min-height:calc(100dvh - 150px);
+  }
+  .fase{font-size:15px;font-weight:500;opacity:.55}
+  .pauta-ativa{margin-top:calc(var(--u)*2)}
+  .tema-t{font-size:13px;opacity:.45}
+  .ref-t{font-family:var(--serif);font-size:20px;font-weight:600;opacity:.7;margin-top:4px}
+  .prov-t{font-family:var(--serif);font-size:clamp(26px,4.6vw,40px);font-weight:500;line-height:1.15;
+    max-width:18ch;margin:calc(var(--u)*1.5) auto 0;text-wrap:balance}
+  .digitos{display:flex;justify-content:center;font:500 clamp(70px,18vw,140px)/.88 var(--ui);letter-spacing:-.04em;margin-top:calc(var(--u)*6)}
+  .digitos span{width:.62em;text-align:center}
+  .digitos span.sep{width:.3em}
+  /* últimos 10 segundos: o relógio colapsa num numeral só */
+  .digitos.unico{font-size:clamp(120px,34vw,230px);line-height:.82}
+  .digitos.unico span{width:auto}
+  .acabando{color:var(--alerta)}
+  /* no zero o numeral vira frase, na serifada da provocação */
+  .digitos.fim{font-family:var(--serif);font-size:clamp(38px,8vw,72px);font-weight:500;
+    line-height:1.1;letter-spacing:-.01em;color:var(--alerta)}
+  .digitos.fim span{width:auto}
+  body.pausado .digitos{opacity:.4}
+  .btn.texto{background:none;border-color:transparent;color:inherit;opacity:.5;font-weight:400;font-size:16px;padding:17px 14px}
+  .btn.texto:hover{opacity:.85;filter:none}
+  body.esgotado #sair{display:none}
+  .risco{position:fixed;left:0;bottom:0;height:4px;background:var(--papel);width:100%;display:none}
+  body.rodando .risco{display:block}
+
+  /* ---------- especimen ---------- */
+  .especimen{border-top:1px solid var(--traco);margin-top:calc(var(--u)*14);padding-top:calc(var(--u)*5);text-align:left}
+  body.rodando .especimen{display:none}
+  .especimen h2{font-family:var(--serif);font-size:28px;font-weight:600;margin-bottom:calc(var(--u)*3)}
+  .cores{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:calc(var(--u)*2)}
+  .cor b{display:block;height:60px;border-radius:2px;border:1px solid var(--traco)}
+  .cor span{display:block;font-size:14px;margin-top:8px}
+  .cor small{opacity:.55}
+  .escala{margin-top:calc(var(--u)*5);display:grid;gap:calc(var(--u)*2)}
+  .linha{display:flex;align-items:baseline;gap:calc(var(--u)*3);border-bottom:1px solid var(--traco);padding-bottom:var(--u)}
+  .linha em{font-style:normal;font-size:14px;opacity:.55;flex:none;width:180px}
+  @media(max-width:640px){.linha{flex-direction:column;gap:4px}.linha em{width:auto}}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none !important;transition-duration:.12s !important}
+    .papelzinho,.folha{transform:none !important}
+    .saindo{transform:none !important}
+  }
+</style>
+</head>
+<body>
+
+<main class="app">
+  <header class="marca">espont<span class="chapeu" id="chapeu">â</span>neo</header>
+
+  <div class="palco">
+    <nav class="categorias" id="categorias" aria-label="Categorias"></nav>
+
+    <div class="mesa">
+      <div class="carta">
+        <div class="folha" id="folha2"></div>
+        <div class="folha" id="folha1"></div>
+        <article class="papelzinho" id="papelzinho" aria-live="polite">
+          <p class="vazio">Sorteia uma e vê no que dá.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button class="btn" id="sortear">Sortear</button>
+      <button class="btn vazado" id="estudar" disabled>Estudar 10 min</button>
+      <button class="btn vazado" id="falar" disabled>Falar 1 min</button>
+    </div>
+    <p class="contagem" id="contagem">12 pautas</p>
+  </div>
+
+  <section class="cronometro" id="cronometro" aria-live="polite">
+    <p class="fase" id="fase">Estudando</p>
+    <div class="pauta-ativa">
+      <p class="tema-t" id="temaTempo"></p>
+      <p class="ref-t" id="refTempo"></p>
+      <p class="prov-t" id="provTempo"></p>
+    </div>
+    <div class="digitos" id="digitos"></div>
+    <div class="acoes">
+      <button class="btn" id="avancar">Já estudei</button>
+      <button class="btn vazado" id="parar">Parar</button>
+      <button class="btn texto" id="sair">Sair</button>
+    </div>
+  </section>
+
+  <section class="especimen">
+    <h2>O sistema</h2>
+    <div class="cores">
+      <div class="cor"><b style="background:#DBDED4"></b><span>sala <small>#DBDED4</small></span></div>
+      <div class="cor"><b style="background:#FBFAF6"></b><span>papel <small>#FBFAF6</small></span></div>
+      <div class="cor"><b style="background:#10193B"></b><span>tinta <small>#10193B</small></span></div>
+      <div class="cor"><b style="background:#1C34A8"></b><span>caneta <small>#1C34A8</small></span></div>
+      <div class="cor"><b style="background:#A81C2E"></b><span>carmim <small>#A81C2E</small></span></div>
+      <div class="cor"><b style="background:#FF6A54"></b><span>alerta <small>#FF6A54</small></span></div>
+    </div>
+    <div class="escala">
+      <div class="linha"><em>provocação, Petrona 500</em><span style="font-family:var(--serif);font-size:42px;line-height:1.15;font-weight:500">Fale sobre o pai que correu.</span></div>
+      <div class="linha"><em>referência, Petrona 600</em><span style="font-family:var(--serif);font-size:20px;font-weight:600">Lucas 15:11-32</span></div>
+      <div class="linha"><em>cronômetro, Familjen 500</em><span style="font-size:56px;font-weight:500;letter-spacing:-.04em">00:47</span></div>
+      <div class="linha"><em>botão, Familjen 600</em><span style="font-size:19px;font-weight:600">Sortear</span></div>
+      <div class="linha"><em>categoria, Familjen 500</em><span style="font-size:17px;font-weight:500">antigo testamento</span></div>
+      <div class="linha"><em>apoio, Familjen 400</em><span style="font-size:14px">Gira um texto. Estuda dez minutos. Fala um.</span></div>
+    </div>
+  </section>
+</main>
+
+<i class="risco" id="risco"></i>
+
+<script>
+const TINTAS = {
+  evangelhos:"#F7F3E8", salmos:"#EDF1FA", cartas:"#F8EFEF",
+  "antigo-testamento":"#EEF4EE", doutrina:"#F3EFF8",
+  "vida-crista":"#FAF2E9", juventude:"#EBF4F4"
+};
+
+const CATEGORIAS = [
+  ["tudo","tudo"],["evangelhos","evangelhos"],["salmos","salmos"],["cartas","cartas"],
+  ["antigo-testamento","antigo testamento"],["doutrina","doutrina"],
+  ["vida-crista","vida cristã"],["juventude","juventude"]
+];
+
+const PAUTAS = [
+  {c:"evangelhos", r:"Lucas 15:11-32", p:"Fale sobre o pai que correu."},
+  {c:"evangelhos", r:"Marcos 4:35-41", p:"Fale sobre dormir no meio do vendaval."},
+  {c:"evangelhos", r:"Lucas 19:1-10", p:"Fale sobre o convite que veio antes da mudança."},
+  {c:"evangelhos", r:"João 8:1-11", p:"Fale sobre o silêncio de Jesus diante da acusação."},
+  {c:"salmos", r:"Salmo 23", p:"Fale sobre o vale, não sobre os pastos verdes."},
+  {c:"salmos", r:"Salmo 13", p:"Fale sobre reclamar com Deus sem perder a fé."},
+  {c:"cartas", r:"Tiago 1:19-25", p:"Fale sobre esquecer a própria cara ao sair do espelho."},
+  {c:"cartas", r:"2 Coríntios 12:7-10", p:"Fale sobre o que Deus escolheu não tirar."},
+  {c:"antigo-testamento", r:"Daniel 3:16-18", p:"Fale sobre a fé que continua mesmo se Deus não livrar."},
+  {c:"antigo-testamento", r:"1 Reis 19:1-18", p:"Fale sobre Deus mandar comer e dormir antes de falar."},
+  {c:"doutrina", r:"Atos 2:42-47", p:"Fale sobre o que eles faziam quando não havia templo."},
+  {c:"juventude", r:"Gênesis 39", p:"Fale sobre correr em vez de conversar com a tentação."}
+];
+
+const $ = (id) => document.getElementById(id);
+let filtro = "tudo", saco = [], atual = null, timer = null;
+
+const nav = $("categorias");
+CATEGORIAS.forEach(([id, rotulo]) => {
+  const b = document.createElement("button");
+  b.className = "cat";
+  b.dataset.id = id;
+  b.setAttribute("aria-pressed", id === filtro);
+  b.textContent = rotulo;
+  b.onclick = () => {
+    filtro = id; saco = [];
+    [...nav.children].forEach(x => x.setAttribute("aria-pressed", x.dataset.id === id));
+    atualizarContagem();
+  };
+  nav.appendChild(b);
+});
+
+const pautasDoFiltro = () => filtro === "tudo" ? PAUTAS : PAUTAS.filter(p => p.c === filtro);
+const atualizarContagem = () => {
+  const n = pautasDoFiltro().length;
+  $("contagem").textContent = n + (n === 1 ? " pauta" : " pautas");
+};
+
+// saco embaralhado: sorteia sem repetir até acabar a categoria
+function proxima(){
+  if (!saco.length){
+    saco = [...pautasDoFiltro()];
+    for (let i = saco.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [saco[i], saco[j]] = [saco[j], saco[i]];
+    }
+    if (atual && saco.length > 1 && saco[0].r === atual.r) [saco[0], saco[1]] = [saco[1], saco[0]];
+  }
+  return saco.pop();
+}
+
+const giroAleatorio = (amp) => (Math.random() * amp * 2 - amp).toFixed(2) + "deg";
+
+// o único momento animado do produto: tirar o papel da pilha
+function sortear(){
+  const papel = $("papelzinho");
+  papel.classList.add("saindo");
+  $("chapeu").classList.remove("flick");
+  setTimeout(() => {
+    atual = proxima();
+    papel.style.setProperty("--giro", giroAleatorio(1.2));
+    papel.style.backgroundColor = TINTAS[atual.c] || "var(--papel)";
+    $("folha1").style.transform = "rotate(" + giroAleatorio(2.6) + ")";
+    $("folha2").style.transform = "rotate(" + giroAleatorio(4) + ")";
+    papel.innerHTML =
+      '<p class="ref">' + atual.r + '</p>' +
+      '<p class="prov">' + atual.p + '</p>' +
+      '<p class="cat-papel">' + (CATEGORIAS.find(c => c[0] === atual.c) || [,""])[1] + '</p>';
+    papel.classList.remove("saindo");
+    $("chapeu").classList.add("flick");
+    $("estudar").disabled = false;
+    $("falar").disabled = false;
+  }, 170);
+}
+
+let fase = null;        // estudo | fala | fim-estudo | fim-fala
+let fimEm = 0, totalMs = 0, restante = 0, pausado = false;
+
+function desenharTempo(resta){
+  const d = $("digitos");
+  const s = Math.ceil(resta / 1000);
+  d.classList.remove("fim");
+  if (resta <= 10000){
+    // 10 9 8 ... 1 0, um numeral só
+    d.classList.add("unico", "acabando");
+    d.innerHTML = "<span>" + s + "</span>";
+  } else {
+    d.classList.remove("unico", "acabando");
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    d.innerHTML = [mm[0], mm[1], ":", ss[0], ss[1]]
+      .map(ch => '<span class="' + (ch === ":" ? "sep" : "") + '">' + ch + '</span>').join("");
+  }
+}
+
+// a pauta continua na tela o tempo inteiro, nos dois cronômetros
+function mostrarPauta(){
+  if (!atual) return;
+  $("temaTempo").textContent = (CATEGORIAS.find(c => c[0] === atual.c) || [,""])[1];
+  $("refTempo").textContent = atual.r;
+  $("provTempo").textContent = atual.p;
+}
+
+function tick(){
+  const resta = Math.max(0, fimEm - Date.now());
+  desenharTempo(resta);
+  $("risco").style.width = (resta / totalMs * 100) + "%";
+  if (resta <= 0){ clearInterval(timer); timer = null; esgotar(fase); }
+}
+
+function rodar(){
+  clearInterval(timer);
+  tick();
+  timer = setInterval(tick, 200);
+}
+
+function iniciar(minutos, rotulo, id){
+  totalMs = minutos * 60000;
+  fimEm = Date.now() + totalMs;      // o fim é um instante, não um contador
+  fase = id;
+  pausado = false;
+  document.body.classList.add("rodando", "invertido");
+  document.body.classList.remove("esgotado", "pausado");
+  $("fase").textContent = rotulo;
+  mostrarPauta();
+  $("avancar").textContent = id === "estudo" ? "Já estudei" : "Terminei";
+  $("parar").textContent = "Parar";
+  rodar();
+}
+
+// parar congela o tempo e não sai da tela
+function pausar(){
+  restante = Math.max(0, fimEm - Date.now());
+  pausado = true;
+  clearInterval(timer); timer = null;
+  document.body.classList.add("pausado");
+  desenharTempo(restante);
+  $("parar").textContent = "Continuar";
+}
+
+function retomar(){
+  fimEm = Date.now() + restante;
+  pausado = false;
+  document.body.classList.remove("pausado");
+  $("parar").textContent = "Parar";
+  rodar();
+}
+
+// no zero a tela para e fica: nada avança sozinho
+function esgotar(de, rotulo){
+  fase = de === "estudo" ? "fim-estudo" : "fim-fala";
+  pausado = false;
+  document.body.classList.add("esgotado");
+  document.body.classList.remove("pausado");
+  const d = $("digitos");
+  d.classList.remove("unico", "acabando");
+  d.classList.add("fim");
+  d.innerHTML = "<span>" + (rotulo || "Deu o tempo") + "</span>";
+  $("risco").style.width = "0%";
+  $("fase").textContent = "";
+  if (de === "estudo"){
+    $("avancar").textContent = "Falar 1 min";
+    $("parar").textContent = "Voltar";
+  } else {
+    $("avancar").textContent = "Sortear outra";
+    $("parar").textContent = "Fechar";
+  }
+}
+
+function encerrar(){
+  clearInterval(timer); timer = null; fase = null; pausado = false;
+  document.body.classList.remove("rodando", "invertido", "esgotado", "pausado");
+}
+
+$("sortear").onclick = sortear;
+$("estudar").onclick = () => iniciar(10, "Estudando", "estudo");
+$("falar").onclick   = () => iniciar(1, "Sua vez de falar", "fala");
+
+$("avancar").onclick = () => {
+  if (fase === "estudo" || fase === "fim-estudo"){ clearInterval(timer); iniciar(1, "Sua vez de falar", "fala"); }
+  else if (fase === "fala"){ clearInterval(timer); timer = null; esgotar("fala", "Fim da fala"); }
+  else { encerrar(); sortear(); }
+};
+
+$("parar").onclick = () => {
+  if (fase === "fim-estudo" || fase === "fim-fala") encerrar();
+  else if (pausado) retomar();
+  else pausar();
+};
+
+$("sair").onclick = encerrar;
+
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && !document.body.classList.contains("rodando")){ e.preventDefault(); sortear(); }
+  if (e.key === "Escape") encerrar();
+});
+
+atualizarContagem();
+sortear();
+</script>
+</body>
+</html>

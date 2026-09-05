@@ -1,0 +1,203 @@
+/* design system do Espontâneo, extraído do protótipo */
+
+:root{
+  /* paleta base: areia, azul, terra queimada, verde opaco */
+  --areia:#D3C7AD;
+  --azul:#28374A;
+  --terra:#754437;
+  --verde:#6B6751;
+
+  --sala:var(--areia);        /* fundo da sala */
+  --papel:#F5F0E4;            /* creme, o papelzinho */
+  --tinta:var(--azul);        /* texto e tela invertida */
+  --caneta:var(--terra);      /* acento: botões, ativo, o chapéu */
+  --carmim:#8F3A2E;           /* perigo, sobre fundo claro */
+  --alerta:#E8683F;           /* sobre a tela invertida */
+  --traco:rgba(107,103,81,.32); /* fio de verde opaco */
+  --ui:"Familjen Grotesk",system-ui,sans-serif;
+  --serif:"Petrona",Georgia,serif;
+  --u:8px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--sala);color:var(--tinta);
+  font-family:var(--ui);font-size:17px;line-height:1.5;
+  min-height:100dvh;
+  transition:background .18s linear,color .18s linear;
+}
+body.invertido{background:var(--tinta);color:var(--papel)}
+:focus-visible{outline:2px solid var(--caneta);outline-offset:4px}
+body.invertido :focus-visible{outline-color:var(--papel)}
+
+.app{max-width:960px;margin:0 auto;padding:calc(var(--u)*4) calc(var(--u)*3) calc(var(--u)*8);text-align:center}
+
+/* ---------- marca ---------- */
+.marca{font-size:20px;font-weight:600;letter-spacing:-.015em}
+.marca .chapeu{display:inline-block;color:var(--caneta);transform-origin:50% 80%}
+.marca .chapeu.flick{animation:flick .5s cubic-bezier(.2,.9,.25,1)}
+@keyframes flick{
+  0%{transform:translateY(-5px) rotate(-9deg)}
+  55%{transform:translateY(1px) rotate(3deg)}
+  100%{transform:none}
+}
+body.invertido .marca .chapeu{color:var(--sala)}
+
+/* ---------- categorias ---------- */
+.categorias{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:6px calc(var(--u)*2.5);margin-top:calc(var(--u)*5);
+}
+@media(max-width:640px){
+  .categorias{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start;
+    margin-inline:calc(var(--u)*-3);padding-inline:calc(var(--u)*3)}
+  .categorias::-webkit-scrollbar{display:none}
+}
+.cat{
+  background:none;border:0;padding:2px 0;cursor:pointer;white-space:nowrap;
+  font:500 17px/1.3 var(--ui);color:inherit;opacity:.5;
+  border-bottom:2px solid transparent;
+}
+.cat:hover{opacity:.8}
+.cat[aria-pressed="true"]{opacity:1;font-weight:600;color:var(--caneta);border-bottom-color:var(--caneta)}
+
+/* ---------- a carta ---------- */
+/* o palco (sem cronômetro) centraliza a carta no meio da tela */
+.palco{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100dvh - 140px)}
+.mesa{display:flex;justify-content:center;margin-top:calc(var(--u)*5);min-height:min(56vh,440px)}
+.carta{position:relative;width:min(100%,660px)}
+
+/* folhas da pilha, atrás — deslocadas de verdade, uma sobre a outra */
+.folha{
+  position:absolute;inset:0;background:var(--papel);border-radius:4px;
+  box-shadow:0 1px 1px rgba(40,55,74,.06),0 10px 22px rgba(40,55,74,.10);
+  transition:transform .22s cubic-bezier(.2,.9,.25,1);
+}
+/* a de baixo cai mais pra fora; a do meio, um tico */
+.carta .folha:nth-of-type(1){translate:13px 16px;background:#EFE9DA}
+.carta .folha:nth-of-type(2){translate:-7px 8px;background:#F2ECDE}
+
+.papelzinho{
+  position:relative;
+  background-color:var(--papel);
+  /* a dobra em quatro: um vinco vertical, um horizontal */
+  background-image:
+    linear-gradient(to right,transparent calc(50% - 1px),rgba(16,25,59,.075) 50%,transparent calc(50% + 1px)),
+    linear-gradient(to bottom,transparent calc(50% - 1px),rgba(16,25,59,.055) 50%,transparent calc(50% + 1px));
+  border-radius:4px;
+  padding:calc(var(--u)*7) calc(var(--u)*5);
+  /* sombra macia = folha claramente por cima das de baixo */
+  box-shadow:0 2px 3px rgba(40,55,74,.10),0 22px 44px rgba(40,55,74,.20);
+  transform:rotate(var(--giro,-.7deg));
+  transition:transform .22s cubic-bezier(.2,.9,.25,1),opacity .16s linear;
+  color:var(--tinta);
+  display:flex;flex-direction:column;justify-content:center;
+  min-height:min(52vh,390px);
+  overflow:hidden;
+}
+/* grão de papel */
+.papelzinho::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* roleta: cada prévia cai no lugar, e a inclinação treme enquanto gira */
+.giro-conteudo{animation:giroEntra .16s ease-out}
+@keyframes giroEntra{from{opacity:.2;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.papelzinho.girando{box-shadow:0 4px 6px rgba(40,55,74,.12),0 26px 50px rgba(40,55,74,.24)}
+
+/* fita nítida em azul do layout, prendendo o papel nos quatro cantos */
+.fita{
+  position:absolute;z-index:3;width:96px;height:23px;pointer-events:none;
+  background:var(--azul);
+  /* brilho diagonal discreto pra parecer fita, não bloco chapado */
+  background-image:linear-gradient(115deg,
+    rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 28%,
+    rgba(255,255,255,.12) 54%,rgba(255,255,255,0) 82%);
+  box-shadow:0 2px 7px rgba(40,55,74,.30);
+}
+.fita--no{top:-11px;left:-32px;transform:rotate(-45deg)}
+.fita--ne{top:-11px;right:-32px;transform:rotate(45deg)}
+.fita--so{bottom:-11px;left:-32px;transform:rotate(45deg)}
+.fita--se{bottom:-11px;right:-32px;transform:rotate(-45deg)}
+
+.ref{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.01em;opacity:.75}
+.prov{
+  font-family:var(--serif);font-size:clamp(32px,6.8vw,56px);font-weight:500;line-height:1.14;
+  margin:calc(var(--u)*3) auto 0;max-width:16ch;text-wrap:balance;
+}
+.cat-papel{margin-top:calc(var(--u)*4);font-size:14px;opacity:.5}
+.vazio{font-family:var(--serif);font-size:clamp(26px,5vw,38px);line-height:1.25;max-width:15ch;margin:0 auto;opacity:.6}
+
+/* ---------- ações ---------- */
+.acoes{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--u);margin-top:calc(var(--u)*5)}
+.cronometro .acoes{margin-top:0}
+.btn{
+  font:600 19px/1 var(--ui);cursor:pointer;
+  padding:17px 38px;border-radius:999px;border:1.5px solid var(--caneta);
+  background:var(--caneta);color:var(--papel);transition:filter .12s linear;
+}
+.btn:hover{filter:brightness(1.13)}
+.btn.vazado{background:none;color:var(--caneta);font-weight:500;padding-inline:22px}
+.btn.vazado:disabled{opacity:.3;cursor:not-allowed}
+body.invertido .btn{background:var(--papel);border-color:var(--papel);color:var(--tinta)}
+body.invertido .btn.vazado{background:none;color:var(--papel)}
+@media(max-width:640px){.btn{flex:1 1 100%}.btn.vazado{flex:1 1 40%}}
+.contagem{margin-top:calc(var(--u)*3);font-size:14px;opacity:.5}
+.contagem-link{color:var(--caneta);text-decoration:none;border-bottom:1px solid transparent}
+.contagem-link:hover{border-bottom-color:var(--caneta)}
+
+/* ---------- cronômetro: um anel calmo com o tempo no centro ---------- */
+.cronometro{display:none}
+body.rodando .palco{display:none}
+body.rodando .cronometro{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(20px,4vh,40px);
+  min-height:calc(100dvh - 120px);
+}
+.fase{font-size:12px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;opacity:.45}
+.pauta-ativa{margin:0 auto;max-width:min(90vw,33rem)}
+.ref-t{font-family:var(--serif);font-size:17px;font-weight:600;opacity:.55}
+.prov-t{font-family:var(--serif);font-size:clamp(22px,3.4vw,32px);font-weight:500;line-height:1.22;
+  margin-top:6px;text-wrap:pretty}
+
+/* o anel */
+.anel{position:relative;width:min(72vw,340px);aspect-ratio:1}
+body.rodando .fase-estudo .anel{animation:respira 6s ease-in-out infinite}
+@keyframes respira{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+.anel-svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.anel-trilho{fill:none;stroke:rgba(251,250,246,.13);stroke-width:2}
+.anel-progresso{
+  fill:none;stroke:var(--papel);stroke-width:2;stroke-linecap:round;
+  transition:stroke-dashoffset .25s linear,stroke .3s linear,stroke-width .3s linear;
+}
+.anel--acabando .anel-progresso{stroke:var(--alerta);stroke-width:3.5}
+.anel--acabando .anel-trilho{stroke:rgba(232,104,63,.18)}
+body.pausado .anel-progresso{opacity:.35}
+.anel-centro{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14%}
+
+/* os dígitos, agora dentro do anel */
+.digitos{display:flex;justify-content:center;font:500 clamp(44px,13vw,86px)/.9 var(--ui);letter-spacing:-.04em}
+.digitos span{width:.62em;text-align:center}
+.digitos span.sep{width:.28em}
+/* últimos 10 segundos: colapsa num numeral só */
+.digitos.unico{font-size:clamp(92px,26vw,150px);line-height:.82}
+.digitos.unico span{width:auto}
+.acabando{color:var(--alerta)}
+/* no zero o numeral vira frase, na serifada da provocação */
+.digitos.fim{font-family:var(--serif);font-size:clamp(26px,5.4vw,44px);font-weight:500;
+  line-height:1.12;letter-spacing:-.01em;color:var(--alerta);text-wrap:balance}
+.digitos.fim span{width:auto}
+body.pausado .digitos{opacity:.4}
+
+.btn.texto{background:none;border-color:transparent;color:inherit;opacity:.5;font-weight:400;font-size:16px;padding:17px 14px}
+.btn.texto:hover{opacity:.85;filter:none}
+body.esgotado #sair{display:none}
+/* o anel é o único indicador de progresso agora */
+.risco{display:none}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none !important;transition-duration:.12s !important}
+  .papelzinho,.folha{transform:none !important}
+  .giro-conteudo{animation:none !important}
+}

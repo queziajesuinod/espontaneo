@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: espontaneo
+      POSTGRES_PASSWORD: espontaneo
+      POSTGRES_DB: espontaneo
+    ports:
+      - "5433:5432"
+    volumes:
+      - dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U espontaneo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  dados:
