@@ -12,6 +12,12 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       proxy: { '/api': `http://localhost:${porta}` }
+    },
+    // atrás do Traefik: libera o domínio no `vite preview` (senão ele bloqueia o host)
+    preview: {
+      host: true,
+      port: 5173,
+      allowedHosts: true
     }
   }
 })
