@@ -80,8 +80,6 @@ export default function App() {
     const elegiveis = filtro === "tudo" ? pautas : pautas.filter((p) => p.categoria === filtro);
     if (!elegiveis.length) return;
 
-    tocarSorteio(); // o plic de tirar um papelzinho
-
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       assentar();
       return;
@@ -90,6 +88,7 @@ export default function App() {
     setGirando(true);
     const inicio = performance.now();
     const duracao = 700 + Math.random() * 800; // ~0,7s a ~1,5s
+    tocarSorteio(duracao); // o folhear dura o mesmo tanto e termina ao assentar
     let anterior: Pauta | null = null;
 
     const passo = () => {

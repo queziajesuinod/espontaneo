@@ -52,19 +52,24 @@ function estalo(ac: AudioContext, inicio: number, dur: number, pico: number, fre
   src.stop(inicio + dur);
 }
 
-/* sortear: folhear um bloquinho — vários estalos rápidos subindo de tom */
-export function tocarSorteio() {
+/* sortear: folhear o bloquinho. Os estalos preenchem toda a duração da roleta
+   e desaceleram igual à animação, então o som termina quando ela para no
+   assunto — nunca antes. */
+export function tocarSorteio(duracaoMs = 900) {
   const ac = contexto();
   if (!ac) return;
   try {
-    const t = ac.currentTime;
-    const folhas = 9;
-    for (let i = 0; i < folhas; i++) {
-      const p = i / (folhas - 1);
-      const quando = t + i * 0.042 + Math.random() * 0.012;
-      const freq = 1800 + p * 1600 + Math.random() * 300; // vai clareando
-      estalo(ac, quando, 0.035, 0.05 + Math.random() * 0.02, freq);
+    const t0 = ac.currentTime;
+    const dur = duracaoMs / 1000;
+    let t = 0;
+    while (t < dur) {
+      const p = t / dur; // progresso 0..1
+      const freq = 1800 + p * 1700 + Math.random() * 250; // vai clareando
+      estalo(ac, t0 + t, 0.035, Math.max(0.02, 0.06 - p * 0.02), freq);
+      t += 0.045 + 0.24 * p * p; // desacelera igual à roleta (intervalo cresce)
     }
+    // toque final, no instante em que assenta
+    estalo(ac, t0 + dur, 0.045, 0.05, 3200);
   } catch {
     /* áudio nunca pode atrapalhar o sorteio */
   }

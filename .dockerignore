@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/.acervo
+.git
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*

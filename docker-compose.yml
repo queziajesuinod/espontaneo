@@ -3,10 +3,11 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: espontaneo
-      POSTGRES_PASSWORD: espontaneo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-espontaneo}
       POSTGRES_DB: espontaneo
     ports:
-      - "5433:5432"
+      # só no localhost — o Postgres não fica exposto para fora da VPS
+      - "127.0.0.1:5433:5432"
     volumes:
       - dados:/var/lib/postgresql/data
     healthcheck:
@@ -14,6 +15,42 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    restart: unless-stopped
+
+  # ---- produção: `docker compose --profile prod up -d --build` ----
+  api:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: postgres://espontaneo:${POSTGRES_PASSWORD:-espontaneo}@db:5432/espontaneo
+      PORT: "3335"
+      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET no .env}
+      IP_SALT: ${IP_SALT:?defina IP_SALT no .env}
+      ACERVO_DIR: /dados/acervo
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@espontaneo.local}
+      ADMIN_SENHA: ${ADMIN_SENHA:-espontaneo}
+    volumes:
+      - acervo:/dados/acervo
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: apps/site/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
 
 volumes:
   dados:
+  acervo:

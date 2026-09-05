@@ -53,6 +53,34 @@ curl -b /tmp/c.txt -X POST localhost:3335/api/admin/publicacoes
 | `POST /api/admin/publicacoes` | Gera o snapshot versionado |
 | `GET /api/admin/metricas` | Fila por origem e acervo por situação |
 
+## Deploy na VPS (Docker)
+
+Tudo empacotado: `db` (Postgres), `api` (Fastify) e `web` (nginx servindo o site
+estático e fazendo proxy de `/api`). A API e o site ficam num profile `prod`, então o
+fluxo de dev (`pnpm banco:up`) continua subindo só o banco.
+
+```bash
+# na VPS, com Docker e Docker Compose instalados
+git clone <repo> espontaneo && cd espontaneo
+cp .env.example .env        # e edite: SESSION_SECRET, IP_SALT, POSTGRES_PASSWORD, ADMIN_*
+
+# gere segredos fortes
+openssl rand -hex 32        # SESSION_SECRET
+openssl rand -hex 16        # IP_SALT
+
+docker compose --profile prod up -d --build   # sobe db + api + web (as migrações rodam sozinhas)
+docker compose --profile prod run --rm api node --experimental-strip-types scripts/semear.ts  # 1ª vez: admin + 47 pautas
+```
+
+O site fica na porta **80**. O snapshot do acervo vive no volume `acervo`, e o banco no
+volume `dados` — os dois sobrevivem a `up`/`down`.
+
+- **HTTPS é necessário em produção**: o cookie de sessão é `secure` quando `NODE_ENV=production`.
+  Ponha um proxy TLS na frente (Caddy/Traefik/nginx + certbot) apontando para a porta 80.
+  Só para testar em `http://IP`, troque `NODE_ENV=development` no `.env`.
+- Atualizar: `git pull && docker compose --profile prod up -d --build`.
+- Publicar de novo o snapshot não é preciso — a API regenera sozinha a cada mudança.
+
 ## Decisões que o código carrega
 
 - **Fila única.** Sugestão do público, rascunho do admin e candidato de IA entram na
