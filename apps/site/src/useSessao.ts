@@ -5,6 +5,7 @@ export type Fase = null | "estudo" | "fala" | "fim-estudo" | "fim-fala";
 type Opcoes = {
   aoIniciar?: (fase: "estudo" | "fala") => void;
   aoTempoEsgotado?: (fase: "estudo" | "fala") => void; // só quando o relógio zera sozinho
+  aoContagem?: (segundos: number) => void; // 10, 9, ... 1 nos últimos dez segundos
 };
 
 /* Regras do design system que moram aqui:
@@ -21,6 +22,7 @@ export function useSessao(opcoes: Opcoes = {}) {
   const total = useRef(1);
   const faseRef = useRef<Fase>(null);
   const relogio = useRef<ReturnType<typeof setInterval> | null>(null);
+  const ultimoSeg = useRef(Infinity); // último segundo já anunciado na contagem
 
   const parar = () => {
     if (relogio.current) clearInterval(relogio.current);
@@ -32,6 +34,13 @@ export function useSessao(opcoes: Opcoes = {}) {
     const tick = () => {
       const resta = Math.max(0, fimEm.current - Date.now());
       setRestante(resta);
+      if (resta > 0) {
+        const seg = Math.ceil(resta / 1000);
+        if (seg <= 10 && seg < ultimoSeg.current) {
+          ultimoSeg.current = seg;
+          opcoesRef.current.aoContagem?.(seg); // 10, 9, ... 1
+        }
+      }
       if (resta <= 0) {
         parar();
         const qual = faseRef.current === "estudo" ? "estudo" : "fala";
@@ -48,6 +57,7 @@ export function useSessao(opcoes: Opcoes = {}) {
     (minutos: number, id: Exclude<Fase, null>) => {
       total.current = minutos * 60_000;
       fimEm.current = Date.now() + total.current;
+      ultimoSeg.current = Infinity;
       faseRef.current = id;
       setFase(id);
       setPausado(false);
@@ -66,6 +76,7 @@ export function useSessao(opcoes: Opcoes = {}) {
 
   const retomar = useCallback(() => {
     fimEm.current = Date.now() + restante;
+    ultimoSeg.current = Infinity;
     setPausado(false);
     rodar();
   }, [restante, rodar]);

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { acervoSchema, ROTULO_CATEGORIA, TINTA_CATEGORIA, type Acervo, type Pauta } from "@espontaneo/shared";
 import { useSaco } from "./useSaco.ts";
 import { useSessao } from "./useSessao.ts";
-import { tocarSorteio, tocarInicio, tocarFim } from "./som.ts";
+import { tocarSorteio, tocarInicio, tocarFim, tocarTique } from "./som.ts";
 
 const giro = (amplitude: number) => `${(Math.random() * amplitude * 2 - amplitude).toFixed(2)}deg`;
 
@@ -34,7 +34,7 @@ export default function App() {
 
   const pautas = useMemo(() => acervo?.pautas ?? [], [acervo]);
   const { atual, proxima } = useSaco(pautas, filtro);
-  const sessao = useSessao({ aoIniciar: tocarInicio, aoTempoEsgotado: tocarFim });
+  const sessao = useSessao({ aoIniciar: tocarInicio, aoTempoEsgotado: tocarFim, aoContagem: tocarTique });
 
   const giroRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mostrando = girando ? previa : atual; // durante a roleta, o papel pisca prévias

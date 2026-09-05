@@ -88,6 +88,20 @@ export function tocarInicio() {
   }
 }
 
+/* contagem regressiva: um bipe por segundo nos últimos dez. Os três últimos
+   sobem de tom para dar urgência. */
+export function tocarTique(segundos: number) {
+  const ac = contexto();
+  if (!ac) return;
+  try {
+    const t = ac.currentTime;
+    const freq = segundos <= 3 ? 900 : 660;
+    nota(ac, freq, t, 0.12, 0.12, "square");
+  } catch {
+    /* silêncio em caso de erro */
+  }
+}
+
 /* fim do tempo: um sino suave descendo, sem susto */
 export function tocarFim() {
   const ac = contexto();
